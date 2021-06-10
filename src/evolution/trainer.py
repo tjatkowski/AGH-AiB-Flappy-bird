@@ -69,7 +69,7 @@ class Trainer:
             best_id, best_score = self.selection()
             self.crossover()
             self.mutation()
-            print(f"generation {i}:   best score now: {best_score + self.score_bonus}  best score overall {self.best_score}  best real score{self.best_real_score} ")
+            print(f"generation {i}:   best score now: {best_score + self.score_bonus}  best score overall {self.best_score}  best real score {self.best_real_score} ")
             self.score_bonus = 0
 
             if not running:
