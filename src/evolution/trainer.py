@@ -16,18 +16,21 @@ class Trainer:
         self.game = FlappyBird(1280, 720, self.num_birds)
 
         self.networks = [self.new_network() for _ in range(num_birds)]
-        self.tap_levels = [max(min(random.gauss(0.6, 0.1), 0.96), 0.1) for _ in range(num_birds)]
+        self.tap_levels = [max(min(random.gauss(0.8, 0.1), 0.96), 0.1) for _ in range(num_birds)]
         self.best_score = 0
+        self.best_real_score = 0
         self.best_network = self.networks[0]
         self.best_tap_level = self.tap_levels[0]
         self.scale_start = scale_start
         self.scale_end = 0.01
         self.scale_decay = (self.scale_end - self.scale_start) / max_generation
         self.scale = self.scale_start
+        self.last_tree_y = None
+        self.score_bonus = 0
 
     def update_scale(self):
         self.scale = (self.scale_start - self.scale_end) \
-                     * (1 - np.cbrt(self.best_score / self.target_score)) \
+                     * (1 - (self.best_score / self.target_score)) \
                      + self.scale_end
         if self.scale < self.scale_end:
             self.scale = self.scale_end
@@ -66,7 +69,8 @@ class Trainer:
             best_id, best_score = self.selection()
             self.crossover()
             self.mutation()
-            print(f"generation {i}:    best score now: {best_score}   best score overall {self.best_score}")
+            print(f"generation {i}:   best score now: {best_score + self.score_bonus}  best score overall {self.best_score}  best real score{self.best_real_score} ")
+            self.score_bonus = 0
 
             if not running:
                 break;
@@ -82,6 +86,12 @@ class Trainer:
 
         x_dist = pipe[0][0] - birds[0].X_POSITION
         y1, y2 = pipe[0][1], pipe[1][1]
+
+        if self.last_tree_y is None:
+            self.last_tree_y = y1
+        elif self.last_tree_y != y1:
+            self.score_bonus += np.abs(self.last_tree_y - y1) * 2
+            self.last_tree_y = y1
 
         all_lost = True
         for i, bird in enumerate(birds):
@@ -104,10 +114,11 @@ class Trainer:
 
     def selection(self):
         birds = self.game.get_birds()
-        best_id =  max(range(self.num_birds), key=lambda x: birds[x].score)
+        best_id = max(range(self.num_birds), key=lambda x: birds[x].score)
         best_score = birds[best_id].score
-        if best_score > self.best_score:
-            self.best_score = best_score
+        if best_score + self.score_bonus > self.best_score:
+            self.best_score = best_score + self.score_bonus
+            self.best_real_score = best_score
             self.best_network = self.networks[best_id]
             self.best_tap_level = self.tap_levels[best_id]
         return best_id, best_score
@@ -121,7 +132,6 @@ class Trainer:
         for i in range(self.num_birds):
             self.networks[i].mutate(amount=0.1, scale=self.scale)
             self.tap_levels[i] = self.tap_levels[i] ** (1 + self.scale * min(max(random.gauss(0, 0.1), -1), 1))
-
 
     def new_network(self):
         # x rury, y1 rury, y2 rury, y ptaka, y vel ptaka
