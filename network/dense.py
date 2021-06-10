@@ -1,0 +1,79 @@
+import numpy as np
+
+class Dense:
+    def __init__(self, size, activation=None, init_method=None):
+        """
+        size: Tuple holding number of neurons in the input and the output
+        activation: Activation function
+            -'elu': Exponential Linear Unit  function
+            -'relu': Rectified linear activation function
+            -'none': linear activation
+        init_method: method for initializing the weights
+            -'He' initialization
+            -'Xavier'(Glorot) initialization
+        """
+        self.size = size
+        self.in_size = size[0]
+        self.out_size = size[1]
+        self.__init_weights(init_method)
+        self.Z = None
+        self.A = None
+        if activation is None:
+            self.nonlin = lambda x: x
+            self.nonlin_deriv = lambda x: np.ones(x.shape)
+        elif activation == 'elu':
+            self.nonlin = Dense.elu
+            self.nonlin_deriv = Dense.dElu
+        elif activation == 'relu':
+            self.nonlin = Dense.relu
+            self.nonlin_deriv = Dense.dRelu
+        
+    def __init_weights(self, init_method):
+        if init_method == 'He':
+            self.W = np.random.randn(self.size[0], self.size[1]) * np.sqrt(1/self.size[0])
+            self.b = np.zeros((1, self.out_size)) 
+        elif init_method == 'Xavier':
+            self.W = np.random.randn(self.size[0], self.size[1]) * np.sqrt(2/(self.size[0] + self.size[1]))
+            self.b = np.zeros((1, self.out_size)) 
+        else:
+            self.W = np.random.normal(0.0, 0.06, size=self.size)
+            self.b = np.random.normal(0.0, 0.06, size=(1, self.out_size))
+            
+    def forward(self, X):
+        self.X = X
+        self.Z = self.X.dot(self.W) + self.b
+        self.A = self.nonlin(self.Z)
+        return self.A
+        
+    def backward(self, dA):
+        m = self.X.shape[0]
+        dZ = dA * self.nonlin_deriv(self.Z)
+        dW = (1/m) * self.X.T.dot(dZ)
+        db = (1/m) * np.sum(dZ, axis=0, keepdims=True)
+        dX = dZ.dot(self.W.T)
+        self.dZ = dZ
+        self.dW = dW
+        self.db = db
+        return dX
+    
+    def update(self, lr):
+        self.W += lr * self.dW
+        self.b += lr * self.db
+            
+    @staticmethod
+    def relu(Z):
+        return np.maximum(0,Z)
+
+    @staticmethod
+    def dRelu(x):
+        x[x<=0] = 0
+        x[x>0] = 1
+        return x
+    
+    @staticmethod
+    def elu(x, alpha = 0.01):
+        return np.where(x>=0, x, alpha*np.exp(x)-1)
+    
+    @staticmethod
+    def dElu(x, alpha = 0.01):
+        return np.where(x>0, 1, alpha*np.exp(x))    
