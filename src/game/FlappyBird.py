@@ -1,8 +1,11 @@
 import pygame
+import numpy as np
 
 from game.Bird import Bird
 from game.Obstacles import Obstacles
 class FlappyBird:
+    grav_acc = 0.4
+
     def __init__(self, width, height, birds_num):
         self.width = width
         self.height = height
@@ -14,11 +17,11 @@ class FlappyBird:
         self.obstacles = Obstacles(self.width, self.height)
 
     def jump(self, index):
-        self.birds[index].jump(12.0)
+        self.birds[index].jump(10.0)
 
     def update(self):
         for bird in self.birds:
-            bird.apply_gravity(0.4)
+            bird.apply_gravity(FlappyBird.grav_acc)
         for bird in self.birds:
             bird.update()
         self.obstacles.update()
@@ -41,6 +44,8 @@ class FlappyBird:
             [result[0], result[1] + Obstacles.HOLE_SIZE/2.0]
         ]
 
+    def v_max(self):
+        return np.sqrt(2*self.height*FlappyBird.grav_acc)
 
     def render(self, screen):
         for bird in self.birds:

@@ -9,6 +9,8 @@ class Bird:
         self.y_velocity = 0.0
         self.height = height
         self.lost = False
+
+        self.score = 0
     
 
     def apply_gravity(self, grav_acc):
@@ -18,7 +20,8 @@ class Bird:
         if self.lost:
             self.y_position = -self.height
             return
-        
+
+        self.score += 1
         self.y_position += self.y_velocity
         if self.y_position >= self.height:
             self.lost = True
