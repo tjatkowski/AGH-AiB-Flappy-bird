@@ -19,7 +19,9 @@ class Trainer:
         self.tap_levels = [max(min(random.gauss(0.6, 0.1), 0.96), 0.1) for _ in range(num_birds)]
         self.best_score = 0
         self.best_network = self.networks[0]
+        self.best_last_network = self.networks[0]
         self.best_tap_level = self.tap_levels[0]
+        self.best_last_tap_level = self.tap_levels[0]
         self.scale_start = scale_start
         self.scale_end = 0.01
         self.scale_decay = (self.scale_end - self.scale_start) / max_generation
@@ -105,6 +107,8 @@ class Trainer:
     def selection(self):
         birds = self.game.get_birds()
         best_id =  max(range(self.num_birds), key=lambda x: birds[x].score)
+        self.best_last_network = self.networks[best_id]
+        self.best_last_tap_level = self.tap_levels[best_id]
         best_score = birds[best_id].score
         if best_score > self.best_score:
             self.best_score = best_score
@@ -113,8 +117,8 @@ class Trainer:
         return best_id, best_score
 
     def crossover(self):
-        self.networks = [deepcopy(self.best_network) for _ in range(self.num_birds)]
-        self.tap_levels = [self.best_tap_level for _ in range(self.num_birds)]
+        self.networks = [deepcopy(self.best_last_network) for _ in range(self.num_birds)]
+        self.tap_levels = [self.best_last_tap_level for _ in range(self.num_birds)]
 
     def mutation(self):
         self.update_scale()
