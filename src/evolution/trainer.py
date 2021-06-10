@@ -6,14 +6,19 @@ import numpy as np
 from copy import deepcopy
 
 class Trainer:
-    def __init__(self, num_birds= 20, max_generation = 100):
+    def __init__(self, num_birds= 50, max_generation = 100):
         self.num_birds = num_birds
         self.max_gen = max_generation
         self.current_gen = 0
-        self.best_score = 0
         self.game = FlappyBird(1280, 720, self.num_birds)
 
         self.networks = [self.new_network() for _ in range(num_birds)]
+        self.best_score = 0
+        self.best_network = self.networks[0]
+        self.scale_start = 0.5
+        self.scale_end = 0.01
+        self.scale_decay = (self.scale_end - self.scale_start) / max_generation
+        self.scale = self.scale_start
 
         
 
@@ -25,7 +30,7 @@ class Trainer:
 
         for i in range(self.max_gen):
             while running:
-                delta_time = clock.tick(300.0)/1000.0
+                # delta_time = clock.tick(500.0)/1000.0
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -49,15 +54,16 @@ class Trainer:
                 pygame.display.flip()
             
             best_id, best_score = self.selection()
-            self.crossover(best_id)
+            self.crossover()
             self.mutation()
-            print(f"generation {i}:    best score: {best_score}")
+            print(f"generation {i}:    best score now: {best_score}   best score overall {self.best_score}")
 
             if not running:
                 break;
 
             self.game.reset(self.num_birds)
         pygame.quit()
+
 
     def decide(self):
         birds = self.game.get_birds()
@@ -75,11 +81,11 @@ class Trainer:
             all_lost = False
             y = bird.y_position
             input = np.array([[
-                x_dist / 500,
+                x_dist / 700,
                 y / 720,
                 y1 / 720,
                 y2 / 720,
-                bird.y_velocity / max_vel
+                bird.y_velocity * 5 / max_vel
             ]])
             output = self.networks[i].predict(input)
             if output > 0.5:
@@ -92,22 +98,25 @@ class Trainer:
         birds = self.game.get_birds()
         best_id =  max(range(self.num_birds), key=lambda x: birds[x].score)
         best_score = birds[best_id].score
+        if best_score > self.best_score:
+            self.best_score = best_score
+            self.best_network = self.networks[best_id]
         return best_id, best_score
 
-    def crossover(self, best_id):
-        best_network = self.networks[best_id]
-        self.networks = [deepcopy(best_network) for _ in range(self.num_birds)]
+    def crossover(self):
+        self.networks = [deepcopy(self.best_network) for _ in range(self.num_birds)]
         
 
     def mutation(self):
+        self.scale += self.scale_decay
         for network in self.networks:
-            network.mutate(amount=0.3, scale=0.1)
+            network.mutate(amount=0.1, scale=self.scale)
 
     def new_network(self):
         # x rury, y1 rury, y2 rury, y ptaka, y vel ptaka
         model = NeuralNetwork([
-            Dense(size=(5, 5), activation='relu', init_method='He'),
-            Dense((5, 1), activation='sigmoid', init_method='He')
+            Dense(size=(5, 5), activation='elu'),
+            Dense((5, 1), activation='sigmoid')
         ])
 
         return model

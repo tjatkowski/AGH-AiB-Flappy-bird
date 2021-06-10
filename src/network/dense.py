@@ -39,8 +39,8 @@ class Dense:
             self.W = np.random.randn(self.size[0], self.size[1]) * np.sqrt(2/(self.size[0] + self.size[1]))
             self.b = np.zeros((1, self.out_size)) 
         else:
-            self.W = np.random.normal(0.0, 0.06, size=self.size)
-            self.b = np.random.normal(0.0, 0.06, size=(1, self.out_size))
+            self.W = np.random.normal(0.0, 0.1, size=self.size)
+            self.b = np.random.normal(0.0, 0.1, size=(1, self.out_size))
             
     def forward(self, X):
         self.X = X
