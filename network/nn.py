@@ -67,6 +67,20 @@ class NeuralNetwork:
     def __update(self):
         for layer in self.layers:
             layer.update(self.lr)
+
+    def mutate(self,scale=0.01, amount=0.1):
+        """
+        Change random waights by a small amount
+        params:
+            scale: std of the weights deltas
+            amount: percent of the weights that will be modified
+        """
+        for layer in self.layers:
+            h, w = layer.W.shape
+            to_mutate = np.random.rand(h+1,w) < amount
+            change = np.random.normal(loc=0, scale=scale, size=(h+1, w)) * to_mutate
+            layer.W += change[:-1, :]
+            layer.b += change[-1, :]
             
     @staticmethod
     def mse(X, Y):
