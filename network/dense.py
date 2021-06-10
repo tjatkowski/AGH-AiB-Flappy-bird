@@ -27,6 +27,9 @@ class Dense:
         elif activation == 'relu':
             self.nonlin = Dense.relu
             self.nonlin_deriv = Dense.dRelu
+        elif activation == 'sigmoid':
+            self.nonlin = Dense.sigmoid
+            self.nonlin_deriv = Dense.dSigmoid
         
     def __init_weights(self, init_method):
         if init_method == 'He':
@@ -59,6 +62,16 @@ class Dense:
     def update(self, lr):
         self.W += lr * self.dW
         self.b += lr * self.db
+
+    @staticmethod
+    def sigmoid(X):
+        return 1/(1+np.exp(-X))
+
+    @staticmethod
+    def dSigmoid(Z):
+        s = 1/(1+np.exp(-Z))
+        dZ = s * (1-s)
+        return dZ
             
     @staticmethod
     def relu(Z):
