@@ -11,6 +11,10 @@ class Bird:
         self.lost = False
 
         self.score = 0
+
+        self.update_render = True
+
+        self.surface = pygame.Surface((Bird.COLLIDER_SIZE[0], Bird.COLLIDER_SIZE[1]), pygame.SRCALPHA)
     
 
     def apply_gravity(self, grav_acc):
@@ -33,4 +37,12 @@ class Bird:
         self.y_velocity = -jump_velocity
     
     def render(self, screen):
-        pygame.draw.rect(screen, (189, 80, 80), (Bird.X_POSITION - Bird.COLLIDER_SIZE[0]/2.0, self.y_position - Bird.COLLIDER_SIZE[1]/2.0, Bird.COLLIDER_SIZE[0], Bird.COLLIDER_SIZE[1]), 0, 10)
+        if self.update_render:
+            self.update_render = False
+            self.surface.fill([0,0,0,0])
+            pygame.draw.rect(self.surface, (189, 80, 80, 100), (0, 0, Bird.COLLIDER_SIZE[0], Bird.COLLIDER_SIZE[1]), 0, 10)
+        screen.blit(self.surface, (Bird.X_POSITION - Bird.COLLIDER_SIZE[0]/2.0, self.y_position - Bird.COLLIDER_SIZE[1]/2.0))
+        #pygame.draw.rect(self.surface, (189, 80, 80), (Bird.X_POSITION - Bird.COLLIDER_SIZE[0]/2.0, self.y_position - Bird.COLLIDER_SIZE[1]/2.0, Bird.COLLIDER_SIZE[0], Bird.COLLIDER_SIZE[1]), 0, 10)
+
+
+        
