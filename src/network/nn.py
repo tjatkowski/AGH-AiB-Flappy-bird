@@ -80,7 +80,7 @@ class NeuralNetwork:
             to_mutate = np.random.rand(h+1,w) < amount
             change = np.random.normal(loc=0, scale=scale, size=(h+1, w)) * to_mutate
             layer.W += change[:-1, :]
-            layer.b += change[-1, :]
+            # layer.b += change[-1, :] / 10
             
     @staticmethod
     def mse(X, Y):
