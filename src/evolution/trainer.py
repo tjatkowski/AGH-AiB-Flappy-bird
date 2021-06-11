@@ -23,7 +23,6 @@ class Trainer:
         self.best_tap_level = self.tap_levels[0]
         self.scale_start = scale_start
         self.scale_end = 0.01
-        self.scale_decay = (self.scale_end - self.scale_start) / max_generation
         self.scale = self.scale_start
         self.last_tree_y = None
         self.score_bonus = 0
