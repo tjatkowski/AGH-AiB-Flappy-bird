@@ -8,7 +8,7 @@ import numpy as np
 from copy import deepcopy
 
 class Trainer:
-    def __init__(self, num_birds=50, max_generation=100, target_score=1200, scale_start=0.9):
+    def __init__(self, num_birds=100, max_generation=100, target_score=2000, scale_start=0.9):
         self.num_birds = num_birds
         self.max_gen = max_generation
         self.target_score = target_score
