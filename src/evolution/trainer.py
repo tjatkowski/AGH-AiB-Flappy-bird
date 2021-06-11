@@ -99,7 +99,7 @@ class Trainer:
                 bird.y_velocity * 5 / max_vel
             ]])
             output = self.networks[i].predict(input)
-            if output > self.tap_levels[i]:
+            if output > 0.5:
                 self.game.jump(i)
         
         return all_lost
