@@ -40,8 +40,8 @@ class FlappyBird:
                 if result == None or position[0] < result[0]:
                     result = position
         return [
-            [result[0] + Obstacles.PIPE_WIDTH / 2, result[1] - Obstacles.HOLE_SIZE/2.0],
-            [result[0] + Obstacles.PIPE_WIDTH / 2, result[1] + Obstacles.HOLE_SIZE/2.0]
+            [result[0], result[1] - Obstacles.HOLE_SIZE/2.0],
+            [result[0], result[1] + Obstacles.HOLE_SIZE/2.0]
         ]
 
     def v_max(self):
