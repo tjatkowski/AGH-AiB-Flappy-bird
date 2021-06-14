@@ -27,8 +27,10 @@ class FlappyBird:
         self.obstacles.update()
 
         for bird in self.birds:
-            if self.obstacles.collides(bird):
+            collide, diff = self.obstacles.collides(bird)
+            if collide:
                 bird.lost = True
+                bird.score -= diff
     
     def get_birds(self):
         return self.birds

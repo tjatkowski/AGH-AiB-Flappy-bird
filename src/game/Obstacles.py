@@ -1,11 +1,12 @@
 import pygame
 import random
+import numpy as np
 
 from game.Bird import Bird
 
 class Obstacles:
-    HOLE_SIZE = 250.0
-    PIPE_WIDTH = 100.0
+    HOLE_SIZE = 200.0
+    PIPE_WIDTH = 80.0
 
     OBSTALCES_VELOCITY = 3.0
 
@@ -24,8 +25,9 @@ class Obstacles:
         for position in self.positions:
             if position[0] <= Bird.X_POSITION + Bird.COLLIDER_SIZE[0]/2.0 + Obstacles.PIPE_WIDTH/2.0 and position[0] >= Bird.X_POSITION - Bird.COLLIDER_SIZE[0]/2.0 - Obstacles.PIPE_WIDTH/2.0:
                 if bird.y_position + Bird.COLLIDER_SIZE[1]/2.0 >= position[1] + Obstacles.HOLE_SIZE/2.0 or bird.y_position - Bird.COLLIDER_SIZE[1]/2.0 <= position[1] - Obstacles.HOLE_SIZE/2.0:
-                    return True
-        return False
+
+                    return True, abs(bird.y_position - position[1])
+        return False, 0
 
     def update(self):
         for position in self.positions:
@@ -36,7 +38,7 @@ class Obstacles:
     
 
     def random_y(self):
-        return random.randint(int(Obstacles.HOLE_SIZE/1.7), int(self.height - Obstacles.HOLE_SIZE/1.7))
+        return random.randint(int(2*Obstacles.HOLE_SIZE/1.7), int(self.height - 2*Obstacles.HOLE_SIZE/1.7))
     
     def render(self, screen):
         for position in self.positions:

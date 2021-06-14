@@ -1,7 +1,7 @@
 import numpy as np
 
 class Dense:
-    def __init__(self, size, activation=None, init_method=None):
+    def __init__(self, size, activation=None, init_method=None, W=None):
         """
         size: Tuple holding number of neurons in the input and the output
         activation: Activation function
@@ -15,7 +15,7 @@ class Dense:
         self.size = size
         self.in_size = size[0]
         self.out_size = size[1]
-        self.__init_weights(init_method)
+        self.__init_weights(init_method, W)
         self.Z = None
         self.A = None
         if activation is None:
@@ -31,16 +31,41 @@ class Dense:
             self.nonlin = Dense.sigmoid
             self.nonlin_deriv = Dense.dSigmoid
         
-    def __init_weights(self, init_method):
+    def __init_weights(self, init_method, W):
         if init_method == 'He':
             self.W = np.random.randn(self.size[0], self.size[1]) * np.sqrt(1/self.size[0])
             self.b = np.zeros((1, self.out_size)) 
         elif init_method == 'Xavier':
             self.W = np.random.randn(self.size[0], self.size[1]) * np.sqrt(2/(self.size[0] + self.size[1]))
-            self.b = np.zeros((1, self.out_size)) 
+            self.b = np.zeros((1, self.out_size))   
+        elif W is not None and type(W) == np.ndarray:
+            if W.shape == self.size:
+                self.W = W
+                self.b = np.zeros((1, self.out_size))   
+            else:
+                raise ValueError
         else:
-            self.W = np.random.normal(0.0, 0.1, size=self.size)
-            self.b = np.random.normal(0.0, 0.1, size=(1, self.out_size))
+            self.W = np.random.normal(0.0, 0.4, size=self.size)
+            # self.b = np.random.normal(0.0, 0.2, size=(1, self.out_size))
+            self.b = np.zeros((1, self.out_size))  
+
+    def set_weights(self, W, b=None):
+        if b is None:
+            self.b = np.zeros((1, self.out_size))   
+        else:
+            if type(b) != np.ndarray:
+                print(type(b))
+                raise TypeError("Given bias must be numpy array")
+            self.b = b
+        
+        if type(W) != np.ndarray:
+            print(type(W))
+            raise TypeError("Weights must be numpy array")
+        if W.shape != self.size:
+            print(W.shape)
+            raise TypeError("Wrong shape of weights")
+        self.W = W
+        
             
     def forward(self, X):
         self.X = X

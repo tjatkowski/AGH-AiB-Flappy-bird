@@ -80,7 +80,36 @@ class NeuralNetwork:
             to_mutate = np.random.rand(h+1,w) < amount
             change = np.random.normal(loc=0, scale=scale, size=(h+1, w)) * to_mutate
             layer.W += change[:-1, :]
-            layer.b += change[-1, :]
+            # layer.b += change[-1, :] / 100
+
+    def crossover(self, network, network2 = None, method="random"):
+        if method == "random":
+            for i, layer in enumerate(self.layers):
+                h, w = layer.W.shape
+                foo = np.random.rand(h, w)
+                mask1 = foo > 0.5
+                mask2  = np.invert(mask1)
+                if np.any((mask1 + mask2) != 1):
+                    raise ValueError
+                new_W = mask1*layer.W + mask2*network.layers[i].W
+                layer.set_weights(new_W)
+        elif method == "half":
+            for i, layer in enumerate(self.layers):
+                h, w = layer.W.shape
+                new_W = layer.W.reshape(-1).copy()
+                new_W[h*w // 2: ] = network.layers[i].W.reshape(-1)[h*w // 2: ] 
+                layer.W = new_W.reshape(h, w)
+        elif method == "mean":
+            for i, layer in enumerate(self.layers):
+                if network2 is None:
+                    layer.W = 0.6*layer.W + 0.4*network.layers[i].W
+                else:
+                    layer.W = 0.3*layer.W + 0.35*network.layers[i].W + 0.35*network2.layers[i].W
+        else:
+            for i, layer in enumerate(self.layers):
+                if i%2 == 1:
+                    layer.set_weights(network.layers[i].W)
+        return self
             
     @staticmethod
     def mse(X, Y):
